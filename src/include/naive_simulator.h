@@ -21,7 +21,7 @@ namespace jasonfxz {
 
 struct Instruction {
     DataType ir;
-    Optype opt;
+    OpType opt;
     int opcode;
     int rd, rs1, rs2, imm;
     int funct3, funct7;

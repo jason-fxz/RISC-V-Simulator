@@ -34,7 +34,7 @@ DataType Concat(int low, int len, int high); // Concatenate two data with differ
 
 ByteType GetByte(DataType data, int pos); // Get the byte at the position pos
 
-std::string OpcodeToStr(Optype opt); // Convert the opcode to string
+std::string OpcodeToStr(OpType opt); // Convert the opcode to string
 
 
 

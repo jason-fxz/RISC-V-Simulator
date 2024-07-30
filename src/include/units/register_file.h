@@ -18,7 +18,7 @@ namespace jasonfxz {
 
 struct Register {
     DataType data     =  0;  /// Register data
-    int      recorder = -1;  /// Record the instruction that writes to this register
+    int      recorder = -1;  /// Record the instruction (ROB id) that writes to this register
 };
 
 struct RegisterFile {

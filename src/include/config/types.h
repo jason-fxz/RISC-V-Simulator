@@ -4,9 +4,9 @@
  * @brief types definition
  * @version 0.1
  * @date 2024-07-25
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 
 #ifndef TYPES_H
@@ -24,25 +24,25 @@ using HalfType = uint16_t; // 16-bit half word
 using ByteType = uint8_t;  // 8-bit byte
 using ReturnType = uint8_t; // return type
 
+enum class OpClass {
+    OTHER,
+    BRANCH,
+    LOAD,
+    STORE,
+    ARITHI,
+    ARITHR,
+};
 
 
-// enum OpcodeType {
-//     R,
-//     I,
-//     S,
-//     B,
-//     U,
-//     J
-// };
-
-enum Optype {
+// Opcode Type
+enum OpType {
     // OTHER
     LUI,   // Load Upper Immediate               0b011'0111    U-type
     AUIPC, // Add Upper Immediate to PC          0b001'0111    U-type
     JAL,   // Jump And Link                      0b110'1111    J-type
     JALR,  // Jump And Link Register             0b110'0111    I-type
 
-    // BRANCH 
+    // BRANCH
     BEQ,   // Branch Equal                       0b110'0011    B-type
     BNE,   // Branch Not Equal                   0b110'0011    B-type
     BLT,   // Branch Less Than                   0b110'0011    B-type
@@ -56,7 +56,7 @@ enum Optype {
     LW,    // Load Word                          0b000'0011    I-type
     LBU,   // Load Byte Unsigned                 0b000'0011    I-type
     LHU,   // Load Halfword Unsigned             0b000'0011    I-type
-    
+
     // STORE
     SB,    // Store Byte                         0b010'0011    S-type
     SH,    // Store Halfword                     0b010'0011    S-type
@@ -89,6 +89,8 @@ enum Optype {
     NONE = 114514,
 };
 
+
+// name of reg
 enum reName {
     zero = 0,
     ra = 1,
@@ -124,8 +126,21 @@ enum reName {
     t6 = 31,
 };
 
-    
-    
+
+// Instruction Type
+struct InsType {
+  private:
+    int opcode;
+    DataType ir;
+    int funct3, funct7;
+  public:
+    OpType opt;
+    OpClass opc;
+    int rd, rs1, rs2, imm;
+};
+
+
+
 
 } // namespace jasonfxz
 

@@ -43,6 +43,9 @@ Callee saved registers (except x0, gp, tp)
 */
 const int REG_FILE_SIZE = 32; // 32 registers
 
+const int MAX_RS_SIZE = 8; // Reservation Station : 8 entries
+
+const int MAX_LSB_SIZE = 8; // Load Store Buffer : 8 entries
 
 
 // const int MAX_ROB_SIZE = 32; // ROB QUEUE : 32 entries

@@ -26,7 +26,9 @@ struct Memory {
     void clear();
     ByteType &operator[](AddrType addr);
     ByteType ReadByte(AddrType addr);
+    ByteType ReadByteU(AddrType addr);
     HalfType ReadHalf(AddrType addr);
+    HalfType ReadHalfU(AddrType addr);
     DataType ReadWord(AddrType addr);
     void WriteByte(AddrType addr, ByteType data);
     void WriteHalf(AddrType addr, HalfType data);
@@ -34,13 +36,11 @@ struct Memory {
 };
 
 
-class MemoryUnit : BaseUnit {
-
-  private:
-    Memory mem;  /// Memory
-    
-
-};
+// TODO
+// class MemoryUnit : BaseUnit {
+//   private:
+//     Memory mem;  /// Memory
+// };
 
 } // namespace jasonfxz
 

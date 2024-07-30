@@ -55,7 +55,7 @@ ByteType GetByte(DataType data, int pos) {
     return (data >> (pos * 8)) & 0xFF;
 }
 
-std::string OpcodeToStr(Optype opt) {
+std::string OpcodeToStr(OpType opt) {
     switch (opt) {
     case LUI: return "LUI";
     case AUIPC: return "AUIPC";
