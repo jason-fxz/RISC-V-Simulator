@@ -154,6 +154,9 @@ struct InsType {
            << " RS2: " << std::setw(3) << ins.rs2 << " IMM: " << std::setw(10) << ins.imm;
         return os;
     }
+    DataType GetIR() const {
+        return ir;
+    }
 
 
     void Print(std::ostream &os) {

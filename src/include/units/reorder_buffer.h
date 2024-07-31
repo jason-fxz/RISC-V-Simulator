@@ -52,6 +52,7 @@ class ReorderBuffer : public BaseUnit {
     Cqueue<RobInter, MAX_ROB_SIZE> rob_queue;
     CdBus *cd_bus;
     Predictor *predictor;
+    bool StoreSuccessFlag{false};
 };
 
 } // namespace jasonfxz

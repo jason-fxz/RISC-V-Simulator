@@ -48,7 +48,7 @@ void ReorderBuffer::Flush(State *cur_state) {
             //     break;
             case BusType::StoreSuccess:
                 assert(info.pos == rob_queue.front().rob_pos);
-                rob_queue.pop();
+                StoreSuccessFlag = true;
                 break;
             default: break;
             };
@@ -56,19 +56,35 @@ void ReorderBuffer::Flush(State *cur_state) {
     cur_state->rob_full = rob_queue.full();
     cur_state->rob_tail_pos = rob_queue.tail();
 #ifdef DEBUG
-    Print();
+    if (cur_state->enable_debug) {
+        Print();
+    }
 #endif
 }
 
 void ReorderBuffer::Commit(State *cur_state, State *next_state) {
     if (rob_queue.empty()) return ;
     auto &front = rob_queue.front();
-    if (front.state != RobState::Write) return;
-    // halt code
+    if (front.state != RobState::Write && front.state != RobState::WaitSt) return;
+    bool commit_flag = true;
+    if (front.ins.opc == OpClass::STORE) {
+        commit_flag = false;
+        if (front.state == RobState::WaitSt && StoreSuccessFlag) {
+            commit_flag = true;
+        }
+    }
+    if (commit_flag) {
 #ifdef DEBUG
-    front.ins.Print(std::cout);
-    next_state->have_commit = true;
+        if (cur_state->enable_debug) {
+            std::cout << "Commit>>>";
+            front.ins.Print(std::cout);
+        }
 #endif
+        // for Step
+        next_state->have_commit = true;
+        next_state->commit_pc = front.ins.ins_addr;
+        next_state->commit_ir = front.ins.GetIR();
+    }
     if (front.ins.opt == ADDI && front.ins.rd == reName::a0 && front.ins.rs1 == 0 && front.ins.imm == 255) {
         next_state->halt = true;
         return ;
@@ -84,7 +100,9 @@ void ReorderBuffer::Commit(State *cur_state, State *next_state) {
         if (front.ins.rd != front.data) {
             // Predicted Failed
 #ifdef DEBUG
-            std::cerr << "Predict Failed!!!!" << std::endl;
+            if (cur_state->enable_debug) {
+                std::cerr << "Predict Failed!!!!" << std::endl;
+            }
 #endif
             next_state->clear = true;
             next_state->pc = front.data ? front.ins.ins_addr + front.ins.imm : front.ins.ins_addr + 4; // By Address Unit
@@ -103,9 +121,16 @@ void ReorderBuffer::Commit(State *cur_state, State *next_state) {
         cd_bus->e.insert(BusInter{BusType::CommitReg,  front.data, front.rob_pos});
         rob_queue.pop();
     } else if (front.ins.opc == OpClass::STORE) {
-        if (cd_bus->e.full()) throw std::runtime_error("CdBus Full");
-        cd_bus->e.insert(BusInter{BusType::CommitMem, front.data, front.rob_pos});
-        front.state = RobState::WaitSt;
+        if (front.state == RobState::Write) {
+            if (cd_bus->e.full()) throw std::runtime_error("CdBus Full");
+            cd_bus->e.insert(BusInter{BusType::CommitMem, front.data, front.rob_pos});
+            front.state = RobState::WaitSt;
+        } else if (front.state == RobState::WaitSt) {
+            if (StoreSuccessFlag) {
+                StoreSuccessFlag = 0;
+                rob_queue.pop();
+            }
+        } else throw std::runtime_error("WTF STORE?");
         // Wait for Store Success in Flush
     } else {
         std::cerr << "FUCK commit" << front.ins.opt << std::endl;

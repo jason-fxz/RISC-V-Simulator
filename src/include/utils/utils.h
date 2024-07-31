@@ -15,6 +15,7 @@
 #include <string>
 #include "../config/types.h"
 #include "../circuits/bus.h"
+#include "config/constant.h"
 #include "units/reorder_buffer.h"
 
 namespace jasonfxz {
@@ -39,6 +40,30 @@ ByteType GetByte(DataType data, int pos); // Get the byte at the position pos
 std::string OpcodeToStr(OpType opt); // Convert the opcode to string
 std::string BusTypeToStr(BusType type); // Convert the bus type to string
 std::string RobStateToStr(RobState state); // Convert the ROB state to string
+
+
+
+struct DebugRecord {
+    AddrType pc;
+    DataType ir;
+    int reg[REG_FILE_SIZE];
+    bool operator==(const DebugRecord &other) const {
+        if (pc != other.pc) return false;
+        if (ir != other.ir) return false;
+        for (int i = 0; i < REG_FILE_SIZE; i++) {
+            if (reg[i] != other.reg[i]) return false;
+        }
+        return true;
+    }
+    void Print() {
+        std::cout << "PC: " << std::hex << pc << "  ir: " << ir << std::dec <<std::endl;
+        for (int i = 0; i < REG_FILE_SIZE; i++) {
+            std::cout << "x" << i << ": " << reg[i] << std::endl;
+        }
+    }
+
+};
+
 
 } // namespace jasonfxz
 

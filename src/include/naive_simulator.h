@@ -14,7 +14,9 @@
 
 #include "config/types.h"
 #include "config/constant.h"
+#include "units/instruction_unit.h"
 #include "units/memory_unit.h"
+#include "utils/utils.h"
 #include <istream>
 
 
@@ -56,8 +58,9 @@ class NSimulator {
     bool pc_sel;
 
     DataType reg[REG_FILE_SIZE];  // registers
+  public:
     ByteType mem[MAX_RAM_SIZE];   // memory
-
+  private:
     nDecoder decoder;
 
   private:
@@ -116,12 +119,13 @@ class NSimulator {
 
   public:
     void Init(std::istream &is);
-    bool Step();
+    bool Step(DebugRecord &record);
     ReturnType Run();
     void PrintReg();
     void PrintRegHelp();
     void PrintMem(AddrType addr, int len);
     void Debug();
+    bool enable_debug{false};
 
 };
 

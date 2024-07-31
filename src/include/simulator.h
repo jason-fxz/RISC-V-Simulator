@@ -24,6 +24,7 @@
 #include "units/reservation_station.h"
 #include "units/load_store_buffer.h"
 #include "units/reorder_buffer.h"
+#include "utils/utils.h"
 
 namespace jasonfxz {
 
@@ -33,8 +34,10 @@ using std::pair;
 class State {
   public:
     // For Debug
+    bool enable_debug{false};
     bool have_commit{false};
-
+    int commit_pc{0};
+    int commit_ir{0};
 
     int clock; // clock cycle
 
@@ -99,6 +102,7 @@ class Simulator {
     ~Simulator();
     void Init(std::istream &is);
     ReturnType Run();
+    bool Step(DebugRecord &record);
   private:
     void Flush();
     void Execute();
@@ -107,8 +111,9 @@ class Simulator {
     CdBus *cd_bus;
     Predictor *predictor;
     BaseUnit *units[5];
-    Memory *mem;
   public:
+    Memory *mem;
+    bool enable_debug{false};
     void PrintReg(std::ostream &os, RegisterFile *regfile);
     void PrintRegFile(std::ostream &os, RegisterFile *regfile);
     void PrintRegHelp(std::ostream &os);

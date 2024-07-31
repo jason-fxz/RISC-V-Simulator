@@ -66,7 +66,7 @@ void Memory::Init(std::istream &is) {
     clear();
     // Read the memory from stdin
 #ifdef DEBUG
-    std::cerr << "Reading memory from stdin" << std::endl;
+    std::cerr << "Reading memory from istream" << std::endl;
 #endif
     char input_str[10];
     AddrType cur_addr = 0x0;

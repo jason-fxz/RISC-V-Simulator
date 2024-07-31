@@ -1,5 +1,6 @@
 #include "simulator.h"
 #include "circuits/bus.h"
+#include "config/constant.h"
 #include "config/types.h"
 #include "units/instruction_unit.h"
 #include "units/register_file.h"
@@ -69,6 +70,7 @@ void Simulator::Flush() {
 
 void Simulator::Execute() {
     next_state = new State;
+    next_state->enable_debug = enable_debug;
     next_state->pc = cur_state->pc;
     next_state->clock = cur_state->clock + 1;
     next_state->wait = cur_state->wait;
@@ -88,31 +90,66 @@ void State::clear_state() {
 
 ReturnType Simulator::Run() {
 #ifdef DEBUG
-    PrintRegHelp(std::cout);
-#endif 
+    if (enable_debug) {
+        PrintRegHelp(std::cout);
+    }
+#endif
     while (true) {
 #ifdef DEBUG
-        std::cerr << std::dec <<  "******************* clock " << next_state->clock << " wait: "  << next_state->wait << " halt: " << next_state->halt << " cur_pc:" << std::hex <<
-                  next_state->pc << std::dec << std::endl;
-        PrintRegFile(std::cerr, &next_state->regfile);
-#endif 
+        if (enable_debug) {
+            std::cerr << std::dec <<  "******************* clock " << next_state->clock << " wait: "  << next_state->wait <<
+                      " halt: " << next_state->halt << " cur_pc:" << std::hex <<
+                      next_state->pc << std::dec << std::endl;
+            PrintRegFile(std::cerr, &next_state->regfile);
+        }
+#endif
         Flush();
-        
         if (cur_state->halt) {
             return cur_state->regfile[reName::a0].data & 255U;
         }
         Execute();
 #ifdef DEBUG
-        
-        if (next_state->have_commit) {
-            PrintReg(std::cout, &next_state->regfile);
+        if (enable_debug) {
+            if (next_state->have_commit) {
+                PrintReg(std::cout, &next_state->regfile);
+            }
+            PrintCdBus(std::cerr);
         }
-        PrintCdBus(std::cerr);
 #endif
     }
 }
 
 
+bool Simulator::Step(DebugRecord &record) {
+    while (true) {
+#ifdef DEBUG
+        if (enable_debug) {
+            std::cerr << std::dec <<  "******************* clock " << next_state->clock << " wait: "  << next_state->wait <<
+                      " halt: " << next_state->halt << " clear: " << next_state->clear << " cur_pc:" << std::hex <<
+                      next_state->pc << std::dec << std::endl;
+            PrintRegFile(std::cerr, &next_state->regfile);
+        }
+#endif
+        Flush();
+        Execute();
+#ifdef DEBUG
+        if (enable_debug) {
+            PrintCdBus(std::cerr);
+        }
+#endif
+        if (next_state->halt) {
+            return false;
+        }
+        if (next_state->have_commit) {
+            for (int i = 0; i < REG_FILE_SIZE; ++i) {
+                record.reg[i] = next_state->regfile.reg[i].data;
+            }
+            record.ir = next_state->commit_ir;
+            record.pc = next_state->commit_pc;
+            return true;
+        }
+    }
+}
 
 void Simulator::PrintRegHelp(std::ostream &os) {
     os << "+**************************************************************************+" << std::endl;
@@ -141,8 +178,8 @@ void Simulator::PrintCdBus(std::ostream &os) {
     for (auto &it : cd_bus->e) {
         if (it.first) {
             os << std::dec << "BUS >>> Type: " << BusTypeToStr(it.second.type) << " Data: " << it.second.data << " RobPos: "
-                      << it.second.pos <<
-                      std::endl;
+               << it.second.pos <<
+               std::endl;
         }
     }
 }
@@ -154,14 +191,14 @@ void Simulator::PrintRegFile(std::ostream &os, RegisterFile *regfile) {
     os << "+-----+----------+-------------+-----+-----+----------+-------------+-----+" << std::endl;
     for (int i = 0; i < REG_FILE_SIZE / 2; ++i) {
         os << "| x" << std::setfill(' ') << std::left << std::setw(2) << i << " | " << std::right
-                  << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[i].data
-                  << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[i].data << " | "
-                  << std::setw(3) << regfile->reg[i].recorder << " | ";
+           << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[i].data
+           << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[i].data << " | "
+           << std::setw(3) << regfile->reg[i].recorder << " | ";
         int j = i | REG_FILE_SIZE / 2;
         os << "x" <<  std::left << std::setw(2) << j << " | " << std::right
-                  << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[j].data
-                  << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[j].data << " | "
-                  << std::setw(3) << regfile->reg[j].recorder << " | " << std::endl;
+           << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[j].data
+           << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[j].data << " | "
+           << std::setw(3) << regfile->reg[j].recorder << " | " << std::endl;
     }
     os << "+-----+----------+-------------+-----+-----+----------+-------------+-----+" << std::endl;
 }
@@ -173,27 +210,27 @@ void Simulator::PrintReg(std::ostream &os, RegisterFile *regfile) {
     os << "+-----+----------+-------------+-----+----------+-------------+" << std::endl;
     for (int i = 0; i < REG_FILE_SIZE / 2; ++i) {
         os << "| x" << std::setfill(' ') << std::left << std::setw(2) << i << " | " << std::right
-                  << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[i].data
-                  << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[i].data << " | ";
+           << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[i].data
+           << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[i].data << " | ";
         int j = i | REG_FILE_SIZE / 2;
         os << "x" <<  std::left << std::setw(2) << j << " | " << std::right
-                  << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[j].data
-                  << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[j].data << " |" << std::endl;
+           << std::setw(8) << std::hex << std::setfill('0') << regfile->reg[j].data
+           << " | " << std::setw(11) << std::dec << std::setfill(' ') << regfile->reg[j].data << " |" << std::endl;
     }
     os << "+-----+----------+-------------+-----+----------+-------------+" << std::endl;
 }
 
 void Simulator::PrintMem(std::ostream &os, AddrType addr, int len) {
     os << "Memory:" << std::endl;
-    os << "+-----+----------+-------------+" << std::endl;
-    os << "| Addr|      Hex |         Dec |" << std::endl;
-    os << "+-----+----------+-------------+" << std::endl;
+    os << "+--------+----------+-------------+" << std::endl;
+    os << "|  Addr  |      Hex |         Dec |" << std::endl;
+    os << "+--------+----------+-------------+" << std::endl;
     for (int i = 0; i < len; ++i) {
-        os << "| " << std::setfill(' ') << std::left << std::setw(4) << std::hex << addr + i << " | " << std::right
-                  << std::setw(8) << std::hex << std::setfill('0') << (int)mem->data[addr + i]
-                  << " | " << std::setw(11) << std::dec << std::setfill(' ') << (int)mem->data[addr + i] << " |" << std::endl;
+        os << "| " << std::setfill(' ') << std::left << std::setw(6) << std::dec << addr + i << " | " << std::right
+           << std::setw(8) << std::hex << std::setfill('0') << (int)mem->data[addr + i]
+           << " | " << std::setw(11) << std::dec << std::setfill(' ') << (int)mem->data[addr + i] << " |" << std::endl;
     }
-    os << "+-----+----------+-------------+" << std::endl;
+    os << "+--------+----------+-------------+" << std::endl;
 }
 
 

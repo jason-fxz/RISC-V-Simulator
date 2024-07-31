@@ -237,35 +237,37 @@ void NSimulator::FetchDecode() {
     // Decode the instruction
     decoder.Decode(ins);
 #ifdef DEBUG
-    std::cerr << "PC: " << std::setw(4) << std::setfill('0') << std::hex << pc
-              << " IR: " << std::setw(8) << std::setfill('0') << ins.ir << std::endl;
-    std::cerr << std::dec;
-    switch (ins.opt) {
-    case ADD: case SUB: case AND: case OR: case XOR: case SLL: case SRL: case SRA: case SLT: case SLTU:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << ", x" << ins.rs2 << std::endl; break;
-    case ADDI: case ANDI: case ORI: case XORI: case SLTI: case SLTIU:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << ", " << ins.imm << std::endl; break;
-    case SLLI: case SRLI: case SRAI:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << ", " << (uint32_t)ins.imm << std::endl;
-        break;
-    case LB: case LBU: case LH: case LHU: case LW:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", " << ins.imm << "(x" << ins.rs1 << ")" << std::endl; break;
-    case SB: case SH: case SW:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rs1 << ", " << ins.imm << "(x" << ins.rs2 << ")" << std::endl; break;
-    case BEQ: case BNE: case BLT: case BLTU: case BGE: case BGEU:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rs1 << ", x" << ins.rs2 << "  <" << ins.imm << ">" << std::endl; break;
-    case JAL:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << "  <" << ins.imm << ">" << std::endl; break;
-    case JALR:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << "  <" << ins.imm << ">" << std::endl; break;
-    case AUIPC:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << "  u" << ins.imm << std::endl; break;
-    case LUI:
-        std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << "  u" << ins.imm  << std::endl; break;
-    case NONE:
-        throw "Invalid Instruction";
-        break;
-    };
+    if (enable_debug) {
+        std::cerr << "PC: " << std::setw(4) << std::setfill('0') << std::hex << pc
+                  << " IR: " << std::setw(8) << std::setfill('0') << ins.ir << std::endl;
+        std::cerr << std::dec;
+        switch (ins.opt) {
+        case ADD: case SUB: case AND: case OR: case XOR: case SLL: case SRL: case SRA: case SLT: case SLTU:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << ", x" << ins.rs2 << std::endl; break;
+        case ADDI: case ANDI: case ORI: case XORI: case SLTI: case SLTIU:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << ", " << ins.imm << std::endl; break;
+        case SLLI: case SRLI: case SRAI:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << ", " << (uint32_t)ins.imm << std::endl;
+            break;
+        case LB: case LBU: case LH: case LHU: case LW:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", " << ins.imm << "(x" << ins.rs1 << ")" << std::endl; break;
+        case SB: case SH: case SW:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rs1 << ", " << ins.imm << "(x" << ins.rs2 << ")" << std::endl; break;
+        case BEQ: case BNE: case BLT: case BLTU: case BGE: case BGEU:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rs1 << ", x" << ins.rs2 << "  <" << ins.imm << ">" << std::endl; break;
+        case JAL:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << "  <" << ins.imm << ">" << std::endl; break;
+        case JALR:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << ", x" << ins.rs1 << "  <" << ins.imm << ">" << std::endl; break;
+        case AUIPC:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << "  u" << ins.imm << std::endl; break;
+        case LUI:
+            std::cerr << OpcodeToStr(ins.opt) << " x" << ins.rd << "  u" << ins.imm  << std::endl; break;
+        case NONE:
+            throw "Invalid Instruction";
+            break;
+        };
+    }
 #endif
 }
 
@@ -472,18 +474,6 @@ void nDecoder::DecodeJ(Instruction &ins) {
     }
 }
 
-bool NSimulator::Step() {
-    FetchDecode();
-    if (ins.ir == 0x0ff00513) return false; // terminate
-    pc_sel = 0;
-    Execute();
-    reg[zero] = 0;
-    if (!pc_sel) pc += 4;
-#ifdef DEBUG
-    PrintReg();
-#endif
-    return true;
-}
 
 void NSimulator::Execute() {
     switch (ins.opt) {
@@ -609,23 +599,43 @@ void NSimulator::PrintReg() {
 
 void NSimulator::PrintMem(AddrType addr, int len) {
     std::cerr << "Memory:" << std::endl;
-    std::cerr << "+-----+----------+-------------+" << std::endl;
-    std::cerr << "| Addr|      Hex |         Dec |" << std::endl;
-    std::cerr << "+-----+----------+-------------+" << std::endl;
+    std::cerr << "+--------+----------+-------------+" << std::endl;
+    std::cerr << "|  Addr  |      Hex |         Dec |" << std::endl;
+    std::cerr << "+--------+----------+-------------+" << std::endl;
     for (int i = 0; i < len; ++i) {
-        std::cerr << "| " << std::setfill(' ') << std::left << std::setw(4) << std::hex << addr + i << " | " << std::right
+        std::cerr << "| " << std::setfill(' ') << std::left << std::setw(6) << std::dec << addr + i << " | " << std::right
                   << std::setw(8) << std::hex << std::setfill('0') << (int)mem[addr + i]
                   << " | " << std::setw(11) << std::dec << std::setfill(' ') << (int)mem[addr + i] << " |" << std::endl;
     }
-    std::cerr << "+-----+----------+-------------+" << std::endl;
+    std::cerr << "+--------+----------+-------------+" << std::endl;
 }
 
+bool NSimulator::Step(DebugRecord &record) {
+    FetchDecode();
+    record.pc = pc;
+    record.ir = ins.ir;
+    if (ins.ir == 0x0ff00513) return false; // terminate
+    pc_sel = 0;
+    Execute();
+    for (int i = 0; i < REG_FILE_SIZE; ++i) {
+        record.reg[i] = reg[i];
+    }
+    reg[zero] = 0;
+    if (!pc_sel) pc += 4;
+#ifdef DEBUG
+    if (enable_debug)
+        PrintReg();
+#endif
+    return true;
+}
 
 ReturnType NSimulator::Run() {
 #ifdef DEBUG
-    PrintRegHelp();
-#endif // DEBUG
-    while (Step());
+    if (enable_debug)
+        PrintRegHelp();
+#endif
+    DebugRecord record;
+    while (Step(record));
     return reg[a0];
 }
 

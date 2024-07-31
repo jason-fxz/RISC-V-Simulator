@@ -1,28 +1,58 @@
 
-#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include "naive_simulator.h"
 #include "simulator.h"
+#include "utils/utils.h"
+#include <cassert>
 
-
-int main() {
+int duipai() {
     jasonfxz::NSimulator nsim;
-    std::cerr << "Using advanced simulator" << std::endl;
     jasonfxz::Simulator sim;
-
-    const char *inputFileName = "input.txt";
-
+    const char *inputFileName = "./testcases/basicopt1.data";
     std::ifstream inputFile(inputFileName, std::ios::in);
     if (!inputFile) {
         std::cerr << "Failed to open input file" << std::endl;
         return 1;
     }
-    nsim.Init(inputFile);
-    inputFile.seekg(0, std::ios::beg);
-    inputFile.clear();
     sim.Init(inputFile);
-    
-    
+    inputFile.close();
+    inputFile.open(inputFileName, std::ios::in);
+    nsim.Init(inputFile);
+    inputFile.close();
+    jasonfxz::DebugRecord last;
+    int step_count = 0;
+    while (true) {
+        ++step_count;
+        jasonfxz::DebugRecord ans, out;
+        bool nflag = nsim.Step(ans);
+        bool flag = sim.Step(out);
+        assert(nflag == flag);
+        if (nflag == false) break;
+        if (!(ans == out)) {
+            std::cerr << "Different output" << std::endl;
+            ans.Print();
+            std::cerr << "vs" << std::endl;
+            out.Print();
+            std::cerr << "LAST OUTPUT" << std::endl;
+            last.Print();
+            std::cerr << "At step " << step_count << std::endl;
+            throw "Error";
+        }
+        last = ans;
+    }
+    return 0;
+}
+
+void omain() {
+    jasonfxz::Simulator sim;
+    sim.Init(std::cin);
+    int ans = sim.Run();
+    std::cout << ans << std::endl;
+}
+
+int main() {
+    // return duipai(); 
+    omain();
     return 0;
 }

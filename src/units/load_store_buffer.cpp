@@ -16,6 +16,8 @@ void LoadStoreBuffer::Flush(State *cur_state) {
         load_queue.clear();
         // the storing should have be done
         store_queue.clear();
+        assert(store_counter == 0);
+        load_counter = store_counter = 0;
         cur_state->lsb_load_full = load_queue.full();
         cur_state->lsb_store_full = store_queue.full();
     }

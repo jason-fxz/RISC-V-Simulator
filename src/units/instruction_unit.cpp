@@ -412,12 +412,10 @@ void InstructionUnit::Issue(State *cur_state, State *next_state) {
         rs_inter.qk = -1;
         rs_inter.vk = front_ins.imm;
     } else throw std::runtime_error("Unmatch Issue");
-
     // Change Regfile
     if (front_ins.rd != -1) {
         next_state->regfile[front_ins.rd].recorder = cur_state->rob_tail_pos;
     }
-
     next_state->query_rob_id1 = rs_inter.qj;
     next_state->query_rob_id2 = rs_inter.qk;
     // send to Rs
@@ -437,13 +435,15 @@ void InstructionUnit::Issue(State *cur_state, State *next_state) {
     }
     ins_queue.pop();
 #ifdef DEBUG
-    std::cerr << "Issue >>> " << front_ins << std::endl;
-    std::cerr << "> RsInter: " << rs_inter << std::endl;
+    if (cur_state->enable_debug) {
+        std::cerr << "Issue >>> " << front_ins << std::endl;
+        std::cerr << "> RsInter: " << rs_inter << std::endl;
+    }
 #endif
 }
 
 bool Predictor::GetPrediction(AddrType pc) {
-    return true;
+    return false;
 }
 
 void Predictor::GetFeedBack(AddrType pc, bool real) {

@@ -49,7 +49,12 @@ for item in "${list[@]}"; do
         echo $? > ./testcases/$item.ans
         rm ./tmp
     fi
+    start_time=$(date +%s%3N)
     ./tmpdir/code < ./testcases/$item.data > ./testcases/$item.out
+    end_time=$(date +%s%3N)
+    elapsed_time=$((end_time - start_time))
+    elapsed_time_ms=$(echo "scale=3; $elapsed_time / 1000" | bc)
+    echo -e "\033[1mElapsed time: \033[35m ${elapsed_time_ms} seconds\033[0m"
     diff -Z ./testcases/$item.out ./testcases/$item.ans 
     if [ $? -eq 0 ]; then
         echo -e "\033[32m Testcase $item passed\033[0m"

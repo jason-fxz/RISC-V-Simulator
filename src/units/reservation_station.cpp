@@ -13,34 +13,39 @@
 namespace jasonfxz {
 
 void ReservationStation::Print() {
-    std::cerr << ">>> ALU_ADD_RS: " << alu_add_rs.count()<< std::endl;
+    std::cerr << ">>> ALU_ADD_RS: " << alu_add_rs.count() << std::endl;
     for (int i = 0; i < alu_add_rs.size(); i++) {
         if (alu_add_rs.busy(i)) {
-            std::cerr << "#" << i << ": " << OpcodeToStr(alu_add_rs[i].ins.opt) << " vj:" << alu_add_rs[i].vj << " vk:" << alu_add_rs[i].vk << " qj:" << alu_add_rs[i].qj << " qk:" << alu_add_rs[i].qk << std::endl;
+            std::cerr << "#" << i << ": " << OpcodeToStr(alu_add_rs[i].ins.opt) << " vj:" << alu_add_rs[i].vj << " vk:" <<
+                      alu_add_rs[i].vk << " qj:" << alu_add_rs[i].qj << " qk:" << alu_add_rs[i].qk << std::endl;
         }
     }
-    std::cerr << ">>> ALU_CAMP_RS: " << alu_camp_rs.count()<< std::endl;
+    std::cerr << ">>> ALU_CAMP_RS: " << alu_camp_rs.count() << std::endl;
     for (int i = 0; i < alu_camp_rs.size(); i++) {
         if (alu_camp_rs.busy(i)) {
-            std::cerr << "#" << i << ": " << OpcodeToStr(alu_camp_rs[i].ins.opt) << " vj:" << alu_camp_rs[i].vj << " vk:" << alu_camp_rs[i].vk << " qj:" << alu_camp_rs[i].qj << " qk:" << alu_camp_rs[i].qk << std::endl;
+            std::cerr << "#" << i << ": " << OpcodeToStr(alu_camp_rs[i].ins.opt) << " vj:" << alu_camp_rs[i].vj << " vk:" <<
+                      alu_camp_rs[i].vk << " qj:" << alu_camp_rs[i].qj << " qk:" << alu_camp_rs[i].qk << std::endl;
         }
     }
-    std::cerr << ">>> ALU_LOGIC_RS: " << alu_logic_rs.count()<< std::endl;
+    std::cerr << ">>> ALU_LOGIC_RS: " << alu_logic_rs.count() << std::endl;
     for (int i = 0; i < alu_logic_rs.size(); i++) {
         if (alu_logic_rs.busy(i)) {
-            std::cerr << "#" << i << ": " << OpcodeToStr(alu_logic_rs[i].ins.opt) << " vj:" << alu_logic_rs[i].vj << " vk:" << alu_logic_rs[i].vk << " qj:" << alu_logic_rs[i].qj << " qk:" << alu_logic_rs[i].qk << std::endl;
+            std::cerr << "#" << i << ": " << OpcodeToStr(alu_logic_rs[i].ins.opt) << " vj:" << alu_logic_rs[i].vj << " vk:" <<
+                      alu_logic_rs[i].vk << " qj:" << alu_logic_rs[i].qj << " qk:" << alu_logic_rs[i].qk << std::endl;
         }
     }
-    std::cerr << ">>> ALU_SHIFT_RS: " << alu_shift_rs.count()<< std::endl;
+    std::cerr << ">>> ALU_SHIFT_RS: " << alu_shift_rs.count() << std::endl;
     for (int i = 0; i < alu_shift_rs.size(); i++) {
         if (alu_shift_rs.busy(i)) {
-            std::cerr << "#" << i << ": " << OpcodeToStr(alu_shift_rs[i].ins.opt) << " vj:" << alu_shift_rs[i].vj << " vk:" << alu_shift_rs[i].vk << " qj:" << alu_shift_rs[i].qj << " qk:" << alu_shift_rs[i].qk << std::endl;
+            std::cerr << "#" << i << ": " << OpcodeToStr(alu_shift_rs[i].ins.opt) << " vj:" << alu_shift_rs[i].vj << " vk:" <<
+                      alu_shift_rs[i].vk << " qj:" << alu_shift_rs[i].qj << " qk:" << alu_shift_rs[i].qk << std::endl;
         }
     }
-    std::cerr << ">>> LSB_RS: " << lsb_rs.count()<< std::endl;
+    std::cerr << ">>> LSB_RS: " << lsb_rs.count() << std::endl;
     for (int i = 0; i < lsb_rs.size(); i++) {
         if (lsb_rs.busy(i)) {
-            std::cerr << "#" << i << ": " << OpcodeToStr(lsb_rs[i].ins.opt) << " vj:" << lsb_rs[i].vj << " vk:" << lsb_rs[i].vk << " qj:" << lsb_rs[i].qj << " qk:" << lsb_rs[i].qk << std::endl;
+            std::cerr << "#" << i << ": " << OpcodeToStr(lsb_rs[i].ins.opt) << " vj:" << lsb_rs[i].vj << " vk:" << lsb_rs[i].vk <<
+                      " qj:" << lsb_rs[i].qj << " qk:" << lsb_rs[i].qk << std::endl;
         }
     }
 }
@@ -52,8 +57,6 @@ void ReservationStation::Flush(State *cur_state) {
             rss[i].clear();
         }
     }
-
-
     if (cur_state->rs_inter.first) {
         if (cur_state->rs_inter.second.ins.opc == OpClass::LOAD
             || cur_state->rs_inter.second.ins.opc == OpClass::STORE) {
@@ -74,7 +77,7 @@ void ReservationStation::Flush(State *cur_state) {
                     throw std::runtime_error("ALU_CAMP_RS full");
                 }
                 break;
-            case XOR: case OR: case AND: 
+            case XOR: case OR: case AND:
             case XORI: case ORI: case ANDI:
                 if (!alu_logic_rs.insert(cur_state->rs_inter.second)) {
                     throw std::runtime_error("ALU_LOGIC_RS full");
@@ -98,19 +101,11 @@ void ReservationStation::Flush(State *cur_state) {
     cur_state->rs_alu_logic_full = alu_logic_rs.full();
     cur_state->rs_alu_shift_full = alu_shift_rs.full();
     cur_state->rs_lsb_full = lsb_rs.full();
-#ifdef DEBUG
-    Print();
-#endif
-
-
-
     // Update Qj, Qk
     pair<bool, int> update[MAX_ROB_SIZE + 1];
     for (int i = 0; i < MAX_ROB_SIZE; ++i) {
         update[i] = {false, 0};
     }
-
-
     // Data From CdBUS
     for (const auto &it : cd_bus->e) if (it.first) {
             const auto &info = it.second;
@@ -141,9 +136,10 @@ void ReservationStation::Flush(State *cur_state) {
             }
         }
     }
-
 #ifdef DEBUG
-    Print();
+    if (cur_state->enable_debug) {
+        Print();
+    }
 #endif
 }
 
