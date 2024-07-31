@@ -9,7 +9,7 @@
 int duipai() {
     jasonfxz::NSimulator nsim;
     jasonfxz::Simulator sim;
-    const char *inputFileName = "./testcases/basicopt1.data";
+    const char *inputFileName = "./testcases/bulgarian.data";
     std::ifstream inputFile(inputFileName, std::ios::in);
     if (!inputFile) {
         std::cerr << "Failed to open input file" << std::endl;
@@ -25,6 +25,10 @@ int duipai() {
     while (true) {
         ++step_count;
         jasonfxz::DebugRecord ans, out;
+        // if (step_count == 4952) {
+        //     sim.enable_debug = true;
+        //     nsim.enable_debug = true;
+        // }
         bool nflag = nsim.Step(ans);
         bool flag = sim.Step(out);
         assert(nflag == flag);

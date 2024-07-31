@@ -92,11 +92,12 @@ void ReorderBuffer::Commit(State *cur_state, State *next_state) {
         // handle JALR
         next_state->regfile[front.ins.rd] = {front.ins.ins_addr + 4, -1};
         next_state->pc = front.data;
+        assert(next_state->pc % 4 == 0);
         next_state->wait = false;
-        cd_bus->e.insert(BusInter{BusType::CommitReg,  front.data, front.rob_pos});
+        cd_bus->e.insert(BusInter{BusType::CommitReg,  int(front.ins.ins_addr + 4), front.rob_pos});
         rob_queue.pop();
     } else if (front.ins.opc == OpClass::BRANCH) {
-        predictor->GetFeedBack(front.ins.ins_addr, front.data);
+        predictor->GetFeedBack(front.ins.ins_addr, front.data, front.ins.rd);
         if (front.ins.rd != front.data) {
             // Predicted Failed
 #ifdef DEBUG
@@ -106,6 +107,7 @@ void ReorderBuffer::Commit(State *cur_state, State *next_state) {
 #endif
             next_state->clear = true;
             next_state->pc = front.data ? front.ins.ins_addr + front.ins.imm : front.ins.ins_addr + 4; // By Address Unit
+            assert(next_state->pc % 4 == 0);
         }
         rob_queue.pop();
     } else if (front.ins.opc == OpClass::ARITHI || front.ins.opc == OpClass::ARITHR

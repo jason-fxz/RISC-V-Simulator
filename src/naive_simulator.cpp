@@ -238,7 +238,7 @@ void NSimulator::FetchDecode() {
     decoder.Decode(ins);
 #ifdef DEBUG
     if (enable_debug) {
-        std::cerr << "PC: " << std::setw(4) << std::setfill('0') << std::hex << pc
+        std::cerr << "NAIVE PC: " << std::setw(4) << std::setfill('0') << std::hex << pc
                   << " IR: " << std::setw(8) << std::setfill('0') << ins.ir << std::endl;
         std::cerr << std::dec;
         switch (ins.opt) {
@@ -581,7 +581,7 @@ void NSimulator::PrintRegHelp() {
 }
 
 void NSimulator::PrintReg() {
-    std::cerr << "Register File:" << std::endl;
+    std::cerr << "Naive Register File:" << std::endl;
     std::cerr << "+-----+----------+-------------+-----+----------+-------------+" << std::endl;
     std::cerr << "| Reg |      Hex |         Dec | Reg |      Hex |         Dec |" << std::endl;
     std::cerr << "+-----+----------+-------------+-----+----------+-------------+" << std::endl;
@@ -598,7 +598,7 @@ void NSimulator::PrintReg() {
 }
 
 void NSimulator::PrintMem(AddrType addr, int len) {
-    std::cerr << "Memory:" << std::endl;
+    std::cerr << "Naive Memory:" << std::endl;
     std::cerr << "+--------+----------+-------------+" << std::endl;
     std::cerr << "|  Addr  |      Hex |         Dec |" << std::endl;
     std::cerr << "+--------+----------+-------------+" << std::endl;

@@ -5,7 +5,9 @@
 #include "units/reorder_buffer.h"
 #include "units/reservation_station.h"
 #include "utils/utils.h"
+#include <iomanip>
 #include <stdexcept>
+// #include <cassert>
 
 namespace jasonfxz {
 
@@ -413,7 +415,8 @@ void InstructionUnit::Issue(State *cur_state, State *next_state) {
         rs_inter.vk = front_ins.imm;
     } else throw std::runtime_error("Unmatch Issue");
     // Change Regfile
-    if (front_ins.rd != -1) {
+    if (front_ins.opc == OpClass::ARITHI || front_ins.opc == OpClass::ARITHR
+    || front_ins.opc == OpClass::LOAD || front_ins.opt == JALR) {
         next_state->regfile[front_ins.rd].recorder = cur_state->rob_tail_pos;
     }
     next_state->query_rob_id1 = rs_inter.qj;
@@ -443,11 +446,24 @@ void InstructionUnit::Issue(State *cur_state, State *next_state) {
 }
 
 bool Predictor::GetPrediction(AddrType pc) {
-    return false;
+    int hash = pc & 0b11111;
+    // 0 1 false ; 2 3 true
+    return table[hash] >= 2;
 }
 
-void Predictor::GetFeedBack(AddrType pc, bool real) {
-    ;
+void Predictor::GetFeedBack(AddrType pc, bool real, bool pred) {
+    ++count_tot;
+    if (real == pred) ++count_suc;
+    int hash = pc & 0b11111;
+    if (real) {
+        if (table[hash] < 3) {
+            ++table[hash];
+        }
+    } else {
+        if (table[hash] > 0) {
+            --table[hash];
+        }
+    }
 }
 
 } // namespace jasonfxz
