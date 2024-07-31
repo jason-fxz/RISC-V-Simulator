@@ -26,6 +26,7 @@ class BaseUnit {
 
     // base on current state, execute the instruction and update the next state
     virtual void Execute(State *cur_state, State *next_state) = 0;
+    virtual ~BaseUnit() = default;
 };
 
 

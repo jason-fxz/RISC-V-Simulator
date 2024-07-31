@@ -15,6 +15,7 @@
 #include "config/types.h"
 #include "config/constant.h"
 #include "units/memory_unit.h"
+#include <istream>
 
 
 namespace jasonfxz {
@@ -27,7 +28,7 @@ struct Instruction {
     int funct3, funct7;
 };
 
-class Decoder {
+class nDecoder {
   private:
     void DecodeR(Instruction &ins);
     void DecodeI(Instruction &ins);
@@ -48,7 +49,7 @@ class Decoder {
 };
 
 
-class Simulator {
+class NSimulator {
   private:
     AddrType pc;
     Instruction ins;
@@ -57,7 +58,7 @@ class Simulator {
     DataType reg[REG_FILE_SIZE];  // registers
     ByteType mem[MAX_RAM_SIZE];   // memory
 
-    Decoder decoder;
+    nDecoder decoder;
 
   private:
     void FetchDecode();
@@ -114,7 +115,7 @@ class Simulator {
 
 
   public:
-    void Init();
+    void Init(std::istream &is);
     bool Step();
     ReturnType Run();
     void PrintReg();

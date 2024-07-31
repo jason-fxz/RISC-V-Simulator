@@ -2,6 +2,8 @@
 #include "config/constant.h"
 #include "config/types.h"
 #include "utils/utils.h"
+#include <iostream>
+#include <istream>
 
 namespace jasonfxz {
 
@@ -50,7 +52,42 @@ void Memory::WriteWord(AddrType addr, DataType data) {
     this->data[addr + 3] = (data >> 24) & 0xff;
 }
 
+inline int HexToInt(char c) {
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+        return c - 'a' + 10;
+    } else {
+        return c - 'A' + 10;
+    }
+}
 
+void Memory::Init(std::istream &is) {
+    clear();
+    // Read the memory from stdin
+#ifdef DEBUG
+    std::cerr << "Reading memory from stdin" << std::endl;
+#endif
+    char input_str[10];
+    AddrType cur_addr = 0x0;
+    while (is >> input_str) {
+#ifdef DEBUG
+        std::cerr << input_str << " ";
+#endif
+        if (input_str[0] == '@') {
+            cur_addr = 0x0;
+            for (int i = 1; i <= 8; i++) {
+                cur_addr = (cur_addr << 4) + HexToInt(input_str[i]);
+            }
+        } else {
+            ByteType current_data = (HexToInt(input_str[0]) << 4) + HexToInt(input_str[1]);
+            data[cur_addr++] = current_data;
+        }
+    }
+#ifdef DEBUG
+    std::cerr << "Reading memory DONE" << std::endl;
+#endif
+}
 
 
 

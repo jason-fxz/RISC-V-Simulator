@@ -29,15 +29,15 @@ class State;
 struct LsbInter {
     OpClass opc;
     OpType opt; // load or store
-    AddrType addr;
-    bool addr_ready; // 0: not ready, 1: ready; 
-    int rob_dst;
+    int rob_pos;
+    AddrType addr{0};
+    bool addr_ready{0}; // 0: not ready, 1: ready; 
 };
 
 
 class LoadStoreBuffer : public BaseUnit {
   public:
-    explicit LoadStoreBuffer(CdBus *cd_bus) : cd_bus(cd_bus) {}
+    explicit LoadStoreBuffer(CdBus *cd_bus, Memory *mem) : cd_bus(cd_bus), mem(mem) {}
     void Flush(State *cur_state) override;
     void Execute(State *cur_state, State *next_state) override;
     

@@ -11,14 +11,14 @@ void AddCalc::Calc() {
     if (cur == 0) return ;
     if (cur == latency) {
         switch (_.opt) {
-        case OpType::ADD:
+        case ADD: case ADDI: case JALR:
             res = _.lhs + _.rhs;
             break;
-        case OpType::SUB:
+        case SUB:
             res = _.lhs - _.rhs;
             break;
         default:
-            throw "Invalid optype in AddCalc";
+            throw std::runtime_error("Invalid optype in AddCalc");
         }
     } else {
         ++cur;
@@ -29,14 +29,26 @@ void CampCalc::Calc() {
     if (cur == 0) return ;
     if (cur == latency) {
         switch (_.opt) {
-        case OpType::SLT:
+        case BEQ:
+            res = _.lhs == _.rhs;
+            break;
+        case BNE:
+            res = _.lhs != _.rhs;
+            break;
+        case BGE:
+            res = _.lhs >= _.rhs;
+            break;
+        case BGEU:
+            res = (uint32_t)_.lhs >= (uint32_t)_.rhs;
+            break;
+        case SLT: case BLT: case SLTI:
             res = _.lhs < _.rhs;
             break;
-        case OpType::SLTU:
+        case SLTU: case BLTU: case SLTIU:
             res = (uint32_t)_.lhs < (uint32_t)_.rhs;
             break;
         default:
-            throw "Invalid optype in CampCalc";
+            throw std::runtime_error("Invalid optype in CampCalc");
         }
     } else {
         ++cur;
@@ -47,17 +59,17 @@ void LogicCalc::Calc() {
     if (cur == 0) return ;
     if (cur == latency) {
         switch (_.opt) {
-        case OpType::XOR:
+        case XOR: case XORI:
             res = _.lhs ^ _.rhs;
             break;
-        case OpType::OR:
+        case OR: case ORI:
             res = _.lhs | _.rhs;
             break;
-        case OpType::AND:
+        case AND: case ANDI:
             res = _.lhs & _.rhs;
             break;
         default:
-            throw "Invalid optype in LogicCalc";
+            throw std::runtime_error("Invalid optype in LogicCalc");
         }
     } else {
         ++cur;
@@ -68,17 +80,17 @@ void ShiftCalc::Calc() {
     if (cur == 0) return ;
     if (cur == latency) {
         switch (_.opt) {
-        case OpType::SLL:
+        case SLL: case SLLI:
             res = _.lhs << _.rhs;
             break;
-        case OpType::SRL:
+        case SRL: case SRLI:
             res = (uint32_t)_.lhs >> _.rhs;
             break;
-        case OpType::SRA:
+        case SRA: case SRAI:
             res = _.lhs >> _.rhs;
             break;
         default:
-            throw "Invalid optype in ShiftCalc";
+            throw std::runtime_error("Invalid optype in ShiftCalc");
         }
     } else {
         ++cur;
@@ -119,6 +131,12 @@ void ShiftCalc::Flush(State *cur_state) {
 
 
 void ArithmeticLogicUnit::Flush(State *cur_state) {
+    if (cur_state->clear) {
+        addCalc.clear();
+        campCalc.clear();
+        logicCalc.clear();
+        shiftCalc.clear();
+    }
     addCalc.Flush(cur_state);
     campCalc.Flush(cur_state);
     logicCalc.Flush(cur_state);
@@ -131,27 +149,23 @@ void ArithmeticLogicUnit::Execute(State *cur_state, State *next_state) {
     logicCalc.Calc();
     shiftCalc.Calc();
     if (addCalc.cur == addCalc.latency) {
-        int index = cd_bus->e.getpos();
-        if (index == -1) throw std::runtime_error("Bus full");
-        cd_bus->e.set(index, {BusType::WriteBack, addCalc.res, addCalc._.rob_dst});
+        if (!cd_bus->e.insert({BusType::WriteBack, addCalc.res, addCalc._.rob_pos})) 
+            throw std::runtime_error("cdBus full");
         addCalc.cur = 0;
     }
     if (campCalc.cur == campCalc.latency) {
-        int index = cd_bus->e.getpos();
-        if (index == -1) throw std::runtime_error("Bus full");
-        cd_bus->e.set(index, {BusType::WriteBack, campCalc.res, campCalc._.rob_dst});
+        if (!cd_bus->e.insert({BusType::WriteBack, campCalc.res, campCalc._.rob_pos})) 
+            throw std::runtime_error("cdBus full");
         campCalc.cur = 0;
     }
     if (logicCalc.cur == logicCalc.latency) {
-        int index = cd_bus->e.getpos();
-        if (index == -1) throw std::runtime_error("Bus full");
-        cd_bus->e.set(index, {BusType::WriteBack, logicCalc.res, logicCalc._.rob_dst});
+        if (!cd_bus->e.insert({BusType::WriteBack, logicCalc.res, logicCalc._.rob_pos})) 
+            throw std::runtime_error("cdBus full");
         logicCalc.cur = 0;
     }
     if (shiftCalc.cur == shiftCalc.latency) {
-        int index = cd_bus->e.getpos();
-        if (index == -1) throw std::runtime_error("Bus full");
-        cd_bus->e.set(index, {BusType::WriteBack, shiftCalc.res, shiftCalc._.rob_dst});
+        if (!cd_bus->e.insert({BusType::WriteBack, shiftCalc.res, shiftCalc._.rob_pos})) 
+            throw std::runtime_error("cdBus full");
         shiftCalc.cur = 0;
     }
 }

@@ -12,54 +12,73 @@
 #ifndef CARRAY_H
 #define CARRAY_H
 
-#include <cstddef>
 #include <utility>
 
 namespace jasonfxz {
 
 
-template <typename Tp, size_t LEN>
+template <typename Tp, int LEN>
 class Carray {
   private:
     std::pair<bool, Tp> data[LEN];
+    int _count;
 
   public:
     class iterator;
     class const_iterator;
-
+    Carray() {
+        clear();
+    }
     int size() const { return LEN; }
-    bool busy(size_t index) const { return data[index].first; }
-    Tp &operator[](size_t index) { return data[index].second; }
+    int count() const { return _count; }
+    bool busy(int index) const { return data[index].first; }
+    Tp &operator[](int index) { return data[index].second; }
     bool full() const {
-        for (size_t i = 0; i < LEN; i++) {
+        for (int i = 0; i < LEN; i++) {
             if (!data[i].first) {
                 return false;
             }
         }
         return true;
     }
-    int getpos() const {
-        for (size_t i = 0; i < LEN; i++) {
-            if (!data[i].first) {
-                return i;
-            }
+    // int getpos() const {
+    //     for (int i = 0; i < LEN; i++) {
+    //         if (!data[i].first) {
+    //             return i;
+    //         }
+    //     }
+    //     return -1;
+    // }
+    // void set(int index, const Tp &value) {
+    //     data[index].first = true;
+    //     data[index].second = value;
+    // }
+    void clean(int index) { data[index].first = false; --_count;}
+
+    void remove(int index) {
+        for (int i = index; i + 1 < _count; ++i) {
+            data[i] = data[i + 1];
         }
-        return -1;
+        data[_count - 1].first = false;
+        --_count;
+
     }
-    void set(size_t index, const Tp &value) {
-        data[index].first = true;
-        data[index].second = value;
-    }
-    void clean(size_t index) { data[index].first = false; }
     bool insert(const Tp &value) {
-        for (size_t i = 0; i < LEN; i++) {
+        for (int i = 0; i < LEN; i++) {
             if (!data[i].first) {
                 data[i].first = true;
                 data[i].second = value;
+                ++_count;
                 return true;
             }
         }
         return false;
+    }
+    void clear() {
+        for (int i = 0; i < LEN; i++) {
+            data[i].first = false;
+        }
+        _count = 0;
     }
     iterator begin() { return iterator(this, 0); }
     iterator end() { return iterator(this, LEN); }
@@ -67,8 +86,8 @@ class Carray {
     class iterator {
       private:
         Carray *carray;
-        size_t index;
-        iterator(Carray *carray, size_t index) : carray(carray), index(index) {}
+        int index;
+        iterator(Carray *carray, int index) : carray(carray), index(index) {}
       public:
         friend Carray;
 
@@ -83,16 +102,17 @@ class Carray {
         }
         bool operator==(const iterator &rhs) const { return index == rhs.index; }
         bool operator!=(const iterator &rhs) const { return index != rhs.index; }
-        Tp &operator*() { return carray->data[index].second; }
-        Tp *operator->() { return &carray->data[index].second; }
+        bool ok() { return carray->data[index].first; }
+        std::pair<bool, Tp> &operator*() { return carray->data[index]; }
+        std::pair<bool, Tp> *operator->() { return &carray->data[index]; }
     };
 
     class const_iterator {
       private:
         const Carray *carray;
-        size_t index;
+        int index;
 
-        const_iterator(const Carray *carray, size_t index) : carray(carray), index(index) {}
+        const_iterator(const Carray *carray, int index) : carray(carray), index(index) {}
       public:
         friend Carray;
         const_iterator(iterator it) : carray(it.carray), index(it.index) {}
@@ -107,8 +127,9 @@ class Carray {
         }
         bool operator==(const const_iterator &rhs) const { return index == rhs.index; }
         bool operator!=(const const_iterator &rhs) const { return index != rhs.index; }
-        const Tp &operator*() { return carray->data[index].second; }
-        const Tp *operator->() { return &carray->data[index].second; }
+        bool ok() { return carray->data[index].first; }
+        const std::pair<bool, Tp> &operator*() { return carray->data[index]; }
+        const std::pair<bool, Tp> *operator->() { return &carray->data[index]; }
     };
 
 };

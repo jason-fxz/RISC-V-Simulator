@@ -14,6 +14,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
+#include <iomanip>
 
 namespace jasonfxz {
 
@@ -36,6 +38,7 @@ enum class OpClass {
 
 // Opcode Type
 enum OpType {
+    NONE = 0,
     // OTHER
     LUI,   // Load Upper Immediate               0b011'0111    U-type
     AUIPC, // Add Upper Immediate to PC          0b001'0111    U-type
@@ -86,7 +89,7 @@ enum OpType {
     AND,   // AND                                0b011'0011    R-type
 
 
-    NONE = 114514,
+
 };
 
 
@@ -126,9 +129,14 @@ enum reName {
     t6 = 31,
 };
 
+std::string OpcodeToStr(OpType opt);
 
 // Instruction Type
 struct InsType {
+    friend class Decoder;
+    friend class InstructionUnit;
+    friend class Simulator;
+
   private:
     int opcode;
     DataType ir;
@@ -136,7 +144,54 @@ struct InsType {
   public:
     OpType opt;
     OpClass opc;
-    int rd, rs1, rs2, imm;
+    int rd{-1}, rs1{-1}, rs2{-1}, imm;
+    AddrType ins_addr;
+    friend std::ostream &operator<<(std::ostream &os, const InsType &ins) {
+        os << "IR: " << std::setw(8) << std::setfill('0') << std::hex << ins.ir
+           << std::dec << std::setfill(' ')
+           << " OP: " << std::setw(5) << OpcodeToStr(ins.opt)
+           << " RD: " << std::setw(3) << ins.rd << " RS1: " << std::setw(3) << ins.rs1
+           << " RS2: " << std::setw(3) << ins.rs2 << " IMM: " << std::setw(10) << ins.imm;
+        return os;
+    }
+
+
+    void Print(std::ostream &os) {
+        os << "PC: " << std::setw(4) << std::setfill('0') << std::hex << this->ins_addr
+                  << " IR: " << std::setw(8) << std::setfill('0') << this->ir << std::endl;
+        os << std::dec;
+        switch (this->opt) {
+        case ADD: case SUB: case AND: case OR: case XOR: case SLL: case SRL: case SRA: case SLT: case SLTU:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << ", x" << this->rs1 << ", x" << this->rs2 << std::endl; break;
+        case ADDI: case ANDI: case ORI: case XORI: case SLTI: case SLTIU:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << ", x" << this->rs1 << ", " << this->imm << std::endl; break;
+        case SLLI: case SRLI: case SRAI:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << ", x" << this->rs1 << ", " <<
+                      (uint32_t)this->imm << std::endl;
+            break;
+        case LB: case LBU: case LH: case LHU: case LW:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << ", " << this->imm << "(x" << this->rs1 << ")" << std::endl;
+            break;
+        case SB: case SH: case SW:
+            os << OpcodeToStr(this->opt) << " x" << this->rs1 << ", " << this->imm << "(x" << this->rs2 << ")" << std::endl;
+            break;
+        case BEQ: case BNE: case BLT: case BLTU: case BGE: case BGEU:
+            os << OpcodeToStr(this->opt) << " x" << this->rs1 << ", x" << this->rs2 << "  <" << this->imm << ">" <<
+                      std::endl; break;
+        case JAL:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << "  <" << this->imm << ">" << std::endl; break;
+        case JALR:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << ", x" << this->rs1 << "  <" << this->imm << ">" << std::endl;
+            break;
+        case AUIPC:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << "  u" << this->imm << std::endl; break;
+        case LUI:
+            os << OpcodeToStr(this->opt) << " x" << this->rd << "  u" << this->imm  << std::endl; break;
+        case NONE:
+            throw "Invalid Instruction";
+            break;
+        };
+    }
 };
 
 

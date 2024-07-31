@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
 # Read the list from /testcases/config
-echo "====================================================================="
-echo "                             Config                                  "
-echo "====================================================================="
+echo -e "\033[1m====================================================================="
+echo "                              Config                                  "
+echo -e "=====================================================================\033[0m"
 
 readarray -t list < ./testcases/config
 
@@ -19,25 +19,26 @@ failed_list=()
 
 
 # Compile the code
-echo "====================================================================="
+echo -e "\033[1m====================================================================="
 echo "                            Compileing                               "
-echo "====================================================================="
+echo -e "=====================================================================\033[0m"
+rm -rf ./tmpdir
 mkdir tmpdir
 cmake -S . -B tmpdir
 make -C tmpdir
 
 if [ $? -eq 0 ]; then
-    echo "Compile success"
+    echo -e "\033[1m\033[32mCompile success\033[0m"
 else
-    echo "Compile failed"
+    echo -e "\033[1m\033[31mCompile failed\033[0m"
     exit 1
 fi
 
 
 # Run the testcases
-echo "====================================================================="
+echo -e "\033[1m====================================================================="
 echo "                         Running testcases                           "
-echo "====================================================================="
+echo -e "=====================================================================\033[0m"
 
 for item in "${list[@]}"; do
     echo "Running test[$item]"
@@ -51,21 +52,21 @@ for item in "${list[@]}"; do
     ./tmpdir/code < ./testcases/$item.data > ./testcases/$item.out
     diff -Z ./testcases/$item.out ./testcases/$item.ans 
     if [ $? -eq 0 ]; then
-        echo " Testcase $item passed"
+        echo -e "\033[32m Testcase $item passed\033[0m"
     else
-        echo " Testcase $item failed"
+        echo -e "\033[31m Testcase $item failed\033[0m"
         # Add the failed testcase to a list
         failed_list+=("$item")
     fi
-    echo "-------------------------------------------"
+    echo -e "\033[2m-------------------------------------------\033[0m"
 
 done
 
 # Print the failed testcases
-echo "====================================================================="
+echo -e "\033[1m====================================================================="
 echo "                             Show result                             "
-echo "====================================================================="
-echo "Finished running testcases, failed count: ${#failed_list[@]}"
+echo -e "=====================================================================\033[0m"
+echo -e "Finished running testcases, failed count: \033[35m ${#failed_list[@]}\033[0m"
 for item in "${failed_list[@]}"; do
     echo "- $item"
 done

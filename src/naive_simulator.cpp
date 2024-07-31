@@ -20,35 +20,35 @@
 namespace jasonfxz {
 
 
-void Simulator::ExeADD(int rd, int rs1, int rs2) {
+void NSimulator::ExeADD(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] + reg[rs2];
 }
 
-void Simulator::ExeSUB(int rd, int rs1, int rs2) {
+void NSimulator::ExeSUB(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] - reg[rs2];
 }
 
-void Simulator::ExeAND(int rd, int rs1, int rs2) {
+void NSimulator::ExeAND(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] & reg[rs2];
 }
 
-void Simulator::ExeOR(int rd, int rs1, int rs2) {
+void NSimulator::ExeOR(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] | reg[rs2];
 }
 
-void Simulator::ExeXOR(int rd, int rs1, int rs2) {
+void NSimulator::ExeXOR(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] ^ reg[rs2];
 }
 
-void Simulator::ExeSLL(int rd, int rs1, int rs2) {
+void NSimulator::ExeSLL(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] << reg[rs2];
 }
 
-void Simulator::ExeSRL(int rd, int rs1, int rs2) {
+void NSimulator::ExeSRL(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] >> reg[rs2];
 }
 
-void Simulator::ExeSRA(int rd, int rs1, int rs2) {
+void NSimulator::ExeSRA(int rd, int rs1, int rs2) {
     if (reg[rs1] & (1 << 31)) {
         reg[rd] = (reg[rs1] >> reg[rs2]) | (0xFFFFFFFF << (32 - reg[rs2]));
     } else {
@@ -56,39 +56,39 @@ void Simulator::ExeSRA(int rd, int rs1, int rs2) {
     }
 }
 
-void Simulator::ExeSLT(int rd, int rs1, int rs2) {
+void NSimulator::ExeSLT(int rd, int rs1, int rs2) {
     reg[rd] = (int32_t)reg[rs1] < (int32_t)reg[rs2] ? 1 : 0;
 }
 
-void Simulator::ExeSLTU(int rd, int rs1, int rs2) {
+void NSimulator::ExeSLTU(int rd, int rs1, int rs2) {
     reg[rd] = reg[rs1] < reg[rs2] ? 1 : 0;
 }
 
-void Simulator::ExeADDI(int rd, int rs1, int imm) {
+void NSimulator::ExeADDI(int rd, int rs1, int imm) {
     reg[rd] = reg[rs1] + imm;
 }
 
-void Simulator::ExeANDI(int rd, int rs1, int imm) {
+void NSimulator::ExeANDI(int rd, int rs1, int imm) {
     reg[rd] = reg[rs1] & imm;
 }
 
-void Simulator::ExeORI(int rd, int rs1, int imm) {
+void NSimulator::ExeORI(int rd, int rs1, int imm) {
     reg[rd] = reg[rs1] | imm;
 }
 
-void Simulator::ExeXORI(int rd, int rs1, int imm) {
+void NSimulator::ExeXORI(int rd, int rs1, int imm) {
     reg[rd] = reg[rs1] ^ imm;
 }
 
-void Simulator::ExeSLLI(int rd, int rs1, int imm) {
+void NSimulator::ExeSLLI(int rd, int rs1, int imm) {
     reg[rd] = reg[rs1] << imm;
 }
 
-void Simulator::ExeSRLI(int rd, int rs1, int imm) {
+void NSimulator::ExeSRLI(int rd, int rs1, int imm) {
     reg[rd] = reg[rs1] >> imm;
 }
 
-void Simulator::ExeSRAI(int rd, int rs1, int imm) {
+void NSimulator::ExeSRAI(int rd, int rs1, int imm) {
     if (reg[rs1] & (1 << 31)) {
         reg[rd] = (reg[rs1] >> imm) | (0xFFFFFFFF << (32 - imm));
     } else {
@@ -96,109 +96,109 @@ void Simulator::ExeSRAI(int rd, int rs1, int imm) {
     }
 }
 
-void Simulator::ExeSLTI(int rd, int rs1, int imm) {
+void NSimulator::ExeSLTI(int rd, int rs1, int imm) {
     reg[rd] = (int32_t)reg[rs1] < imm ? 1 : 0;
 }
 
-void Simulator::ExeSLTUI(int rd, int rs1, int imm) {
+void NSimulator::ExeSLTUI(int rd, int rs1, int imm) {
     reg[rd] = reg[rs1] < (uint32_t)imm ? 1 : 0;
 }
 
-void Simulator::ExeLB(int rd, int rs1, int imm) {
+void NSimulator::ExeLB(int rd, int rs1, int imm) {
     reg[rd] = SEXT(mem[reg[rs1] + imm]);
 }
 
-void Simulator::ExeLBU(int rd, int rs1, int imm) {
+void NSimulator::ExeLBU(int rd, int rs1, int imm) {
     reg[rd] = ZEXT(mem[reg[rs1] + imm]);
 }
 
-void Simulator::ExeLH(int rd, int rs1, int imm) {
+void NSimulator::ExeLH(int rd, int rs1, int imm) {
     reg[rd] = SEXT(Concat(mem[reg[rs1] + imm], mem[reg[rs1] + imm + 1]));
 }
 
-void Simulator::ExeLHU(int rd, int rs1, int imm) {
+void NSimulator::ExeLHU(int rd, int rs1, int imm) {
     reg[rd] = ZEXT(Concat(mem[reg[rs1] + imm], mem[reg[rs1] + imm + 1]));
 }
 
-void Simulator::ExeLW(int rd, int rs1, int imm) {
+void NSimulator::ExeLW(int rd, int rs1, int imm) {
     reg[rd] = Concat(mem[reg[rs1] + imm], mem[reg[rs1] + imm + 1], mem[reg[rs1] + imm + 2], mem[reg[rs1] + imm + 3]);
 }
 
-void Simulator::ExeSB(int rs1, int rs2, int imm) {
+void NSimulator::ExeSB(int rs1, int rs2, int imm) {
     mem[reg[rs1] + imm] = GetByte(reg[rs2], 0);
 }
 
-void Simulator::ExeSH(int rs1, int rs2, int imm) {
+void NSimulator::ExeSH(int rs1, int rs2, int imm) {
     mem[reg[rs1] + imm] = GetByte(reg[rs2], 0);
     mem[reg[rs1] + imm + 1] = GetByte(reg[rs2], 1);
 }
 
-void Simulator::ExeSW(int rs1, int rs2, int imm) {
+void NSimulator::ExeSW(int rs1, int rs2, int imm) {
     mem[reg[rs1] + imm] = GetByte(reg[rs2], 0);
     mem[reg[rs1] + imm + 1] = GetByte(reg[rs2], 1);
     mem[reg[rs1] + imm + 2] = GetByte(reg[rs2], 2);
     mem[reg[rs1] + imm + 3] = GetByte(reg[rs2], 3);
 }
 
-void Simulator::ExeBEQ(int rs1, int rs2, int off) {
+void NSimulator::ExeBEQ(int rs1, int rs2, int off) {
     if (reg[rs1] == reg[rs2]) {
         pc += off;
         pc_sel = 1;
     }
 }
 
-void Simulator::ExeBGE(int rs1, int rs2, int off) {
+void NSimulator::ExeBGE(int rs1, int rs2, int off) {
     if ((int32_t)reg[rs1] >= (int32_t)reg[rs2]) {
         pc += off;
         pc_sel = 1;
     }
 }
 
-void Simulator::ExeBGEU(int rs1, int rs2, int off) {
+void NSimulator::ExeBGEU(int rs1, int rs2, int off) {
     if (reg[rs1] >= reg[rs2]) {
         pc += off;
         pc_sel = 1;
     }
 }
 
-void Simulator::ExeBLT(int rs1, int rs2, int off) {
+void NSimulator::ExeBLT(int rs1, int rs2, int off) {
     if ((int32_t)reg[rs1] < (int32_t)reg[rs2]) {
         pc += off;
         pc_sel = 1;
     }
 }
 
-void Simulator::ExeBLTU(int rs1, int rs2, int off) {
+void NSimulator::ExeBLTU(int rs1, int rs2, int off) {
     if (reg[rs1] < reg[rs2]) {
         pc += off;
         pc_sel = 1;
     }
 }
 
-void Simulator::ExeBNE(int rs1, int rs2, int off) {
+void NSimulator::ExeBNE(int rs1, int rs2, int off) {
     if (reg[rs1] != reg[rs2]) {
         pc += off;
         pc_sel = 1;
     }
 }
 
-void Simulator::ExeJAL(int rd, int off) {
+void NSimulator::ExeJAL(int rd, int off) {
     reg[rd] = pc + 4;
     pc += off;
     pc_sel = 1;
 }
 
-void Simulator::ExeJALR(int rd, int rs1, int off) {
+void NSimulator::ExeJALR(int rd, int rs1, int off) {
     reg[rd] = pc + 4;
     pc = reg[rs1] + off;
     pc_sel = 1;
 }
 
-void Simulator::ExeAUIPC(int rd, int immu) {
+void NSimulator::ExeAUIPC(int rd, int immu) {
     reg[rd] = pc + (immu << 12);
 }
 
-void Simulator::ExeLUI(int rd, int immu) {
+void NSimulator::ExeLUI(int rd, int immu) {
     reg[rd] = immu << 12;
 }
 
@@ -212,13 +212,13 @@ inline int HexToInt(char c) {
     }
 }
 
-void Simulator::Init() {
+void NSimulator::Init(std::istream &is) {
     memset(mem, 0, sizeof(mem));
     memset(reg, 0, sizeof(reg));
     // Read the memory from stdin
     char input_str[10];
     AddrType cur_addr = 0x0;
-    while (std::cin >> input_str) {
+    while (is >> input_str) {
         if (input_str[0] == '@') {
             cur_addr = 0x0;
             for (int i = 1; i <= 8; i++) {
@@ -231,7 +231,7 @@ void Simulator::Init() {
     }
 }
 
-void Simulator::FetchDecode() {
+void NSimulator::FetchDecode() {
     // Fetch the instruction from memory
     ins.ir = (Concat(mem[pc], mem[pc + 1], mem[pc + 2], mem[pc + 3]));
     // Decode the instruction
@@ -269,7 +269,7 @@ void Simulator::FetchDecode() {
 #endif
 }
 
-void Decoder::Decode(Instruction &ins) {
+void nDecoder::Decode(Instruction &ins) {
     ins.opcode = GetByte(ins.ir, 0) & 0x7F;  /// [6:0]
     switch (ins.opcode) {
     case 0b011'0111:
@@ -290,30 +290,30 @@ void Decoder::Decode(Instruction &ins) {
     };
 }
 
-void Decoder::GetFunct3(Instruction &ins) {
+void nDecoder::GetFunct3(Instruction &ins) {
     // [31:24] [23:16] [15:8] [7:0]
     ins.funct3 = (GetByte(ins.ir, 1) & 0b0111'0000U) >> 4; /// [14:12]
 }
-void Decoder::GetFunct7(Instruction &ins) {
+void nDecoder::GetFunct7(Instruction &ins) {
     // [31:24] [23:16] [15:8] [7:0]
     ins.funct7 = (GetByte(ins.ir, 3) & 0b1111'1110U) >> 1; /// [31:25]
 }
-void Decoder::GetRd(Instruction &ins) {
+void nDecoder::GetRd(Instruction &ins) {
     // [31:24] [23:16] [15:8] [7:0]
     ins.rd = (ins.ir & 0b1111'1000'0000U) >> 7; /// [11:7]
 }
-void Decoder::GetRs1(Instruction &ins) {
+void nDecoder::GetRs1(Instruction &ins) {
     // [31:24] [23:16] [15:8] [7:0]
     ins.rs1 = (ins.ir & 0b1111'1000'0000'0000'0000U) >> 15; /// [19:15]
 }
 
-void Decoder::GetRs2(Instruction &ins) {
+void nDecoder::GetRs2(Instruction &ins) {
     // [31:24] [23:16] [15:8] [7:0]
     ins.rs2 = (ins.ir & 0b0001'1111'0000'0000'0000'0000'0000U) >> 20; /// [24:20]
 }
 
 
-void Decoder::DecodeR(Instruction &ins) {
+void nDecoder::DecodeR(Instruction &ins) {
     GetFunct7(ins);
     GetRs2(ins);
     GetRs1(ins);
@@ -349,7 +349,7 @@ void Decoder::DecodeR(Instruction &ins) {
     }
 }
 
-void Decoder::DecodeI(Instruction &ins) {
+void nDecoder::DecodeI(Instruction &ins) {
     GetRs1(ins);
     GetFunct3(ins);
     GetRd(ins);
@@ -404,7 +404,7 @@ void Decoder::DecodeI(Instruction &ins) {
     };
 }
 
-void Decoder::DecodeS(Instruction &ins) {
+void nDecoder::DecodeS(Instruction &ins) {
     GetRs1(ins);
     GetRs2(ins);
     GetFunct3(ins);
@@ -421,7 +421,7 @@ void Decoder::DecodeS(Instruction &ins) {
     }
 }
 
-void Decoder::DecodeB(Instruction &ins) {
+void nDecoder::DecodeB(Instruction &ins) {
     GetRs1(ins);
     GetRs2(ins);
     GetFunct3(ins);
@@ -448,7 +448,7 @@ void Decoder::DecodeB(Instruction &ins) {
     }
 }
 
-void Decoder::DecodeU(Instruction &ins) {
+void nDecoder::DecodeU(Instruction &ins) {
     GetRd(ins);
     //  31:12 => 31:12
     ins.imm = (ins.ir & 0xFFFFF000) >> 12;
@@ -460,7 +460,7 @@ void Decoder::DecodeU(Instruction &ins) {
     }
 }
 
-void Decoder::DecodeJ(Instruction &ins) {
+void nDecoder::DecodeJ(Instruction &ins) {
     GetRd(ins);
     // 31=>20  30:21=>10:1  20=>11  19:12=>19:12
     ins.imm = SEXT(((ins.ir >> 11) & 0b1'0000'0000'0000'0000'0000)
@@ -472,7 +472,7 @@ void Decoder::DecodeJ(Instruction &ins) {
     }
 }
 
-bool Simulator::Step() {
+bool NSimulator::Step() {
     FetchDecode();
     if (ins.ir == 0x0ff00513) return false; // terminate
     pc_sel = 0;
@@ -485,7 +485,7 @@ bool Simulator::Step() {
     return true;
 }
 
-void Simulator::Execute() {
+void NSimulator::Execute() {
     switch (ins.opt) {
     case ADD:
         ExeADD(ins.rd, ins.rs1, ins.rs2); break;
@@ -567,7 +567,7 @@ void Simulator::Execute() {
     };
 }
 
-void Simulator::PrintRegHelp() {
+void NSimulator::PrintRegHelp() {
     std::cerr << "+**************************************************************************+" << std::endl;
     std::cerr << "+  #   + Name + Description           +  #   + Name + Description          +" << std::endl;
     std::cerr << "+******+******+***********************+******+******+**********************+" << std::endl;
@@ -590,7 +590,7 @@ void Simulator::PrintRegHelp() {
     std::cerr << "+**************************************************************************+" << std::endl;
 }
 
-void Simulator::PrintReg() {
+void NSimulator::PrintReg() {
     std::cerr << "Register File:" << std::endl;
     std::cerr << "+-----+----------+-------------+-----+----------+-------------+" << std::endl;
     std::cerr << "| Reg |      Hex |         Dec | Reg |      Hex |         Dec |" << std::endl;
@@ -607,7 +607,7 @@ void Simulator::PrintReg() {
     std::cerr << "+-----+----------+-------------+-----+----------+-------------+" << std::endl;
 }
 
-void Simulator::PrintMem(AddrType addr, int len) {
+void NSimulator::PrintMem(AddrType addr, int len) {
     std::cerr << "Memory:" << std::endl;
     std::cerr << "+-----+----------+-------------+" << std::endl;
     std::cerr << "| Addr|      Hex |         Dec |" << std::endl;
@@ -621,7 +621,7 @@ void Simulator::PrintMem(AddrType addr, int len) {
 }
 
 
-ReturnType Simulator::Run() {
+ReturnType NSimulator::Run() {
 #ifdef DEBUG
     PrintRegHelp();
 #endif // DEBUG

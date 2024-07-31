@@ -14,6 +14,8 @@
 #include <cstdint>
 #include <string>
 #include "../config/types.h"
+#include "../circuits/bus.h"
+#include "units/reorder_buffer.h"
 
 namespace jasonfxz {
     
@@ -35,8 +37,8 @@ DataType Concat(int low, int len, int high); // Concatenate two data with differ
 ByteType GetByte(DataType data, int pos); // Get the byte at the position pos
 
 std::string OpcodeToStr(OpType opt); // Convert the opcode to string
-
-
+std::string BusTypeToStr(BusType type); // Convert the bus type to string
+std::string RobStateToStr(RobState state); // Convert the ROB state to string
 
 } // namespace jasonfxz
 

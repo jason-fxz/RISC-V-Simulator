@@ -21,8 +21,12 @@ struct Register {
     int      recorder = -1;  /// Record the instruction (ROB id) that writes to this register
 };
 
-struct RegisterFile {
-    Register regs[REG_FILE_SIZE];  /// Register file
+
+struct RegisterFile{
+    Register reg[REG_FILE_SIZE];  /// Register file
+    Register &operator[](const int &k) {
+        return reg[k];
+    }
 };
 
 }

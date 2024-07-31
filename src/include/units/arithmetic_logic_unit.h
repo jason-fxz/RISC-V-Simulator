@@ -13,7 +13,6 @@
 #define ARITHMETIC_LOGIC_UNIT_H
 
 
-#include <cstdint>
 #include "base_unit.h"
 #include "config/types.h"
 #include "circuits/bus.h"
@@ -23,7 +22,7 @@ namespace jasonfxz {
 
 struct AluInter {
     int lhs, rhs;
-    int rob_dst;
+    int rob_pos;
     OpType opt;
 };
 
@@ -37,6 +36,9 @@ class BaseCalc {
   public:
     virtual void Calc() = 0;
     virtual void Flush(State *cur_state) = 0;
+    void clear() {
+        cur = 0;
+    }
 };
 
 // ADD / SUB
@@ -67,7 +69,7 @@ class ShiftCalc : public BaseCalc {
   public:
     void Calc() override;
     void Flush(State *cur_state) override;
-    
+
 };
 
 

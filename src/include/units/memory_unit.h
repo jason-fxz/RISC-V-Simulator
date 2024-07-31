@@ -15,6 +15,8 @@
 #include "config/constant.h"
 #include "config/types.h"
 #include "base_unit.h"
+#include <iostream>
+#include <istream>
 
 namespace jasonfxz {
 
@@ -22,6 +24,7 @@ struct Memory {
   private:
     ByteType data[MAX_RAM_SIZE];  /// Memory
   public:
+  friend class Simulator;
     Memory();
     void clear();
     ByteType &operator[](AddrType addr);
@@ -33,6 +36,7 @@ struct Memory {
     void WriteByte(AddrType addr, ByteType data);
     void WriteHalf(AddrType addr, HalfType data);
     void WriteWord(AddrType addr, DataType data);
+    void Init(std::istream &is);
 };
 
 

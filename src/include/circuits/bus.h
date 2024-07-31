@@ -17,9 +17,12 @@
 
 namespace jasonfxz {
 
-enum BusType {
+enum class BusType {
     WriteBack,  // Write back to ROB (Load / ALU)
-    Commit,     // ROB Commit to register file / memory
+    GetAddr,    // Get address for LSB
+    // Executing,  // Execute
+    CommitReg,     // ROB Commit to register file
+    CommitMem,   // Store to memory
     StoreSuccess,  // Store success
 };
 

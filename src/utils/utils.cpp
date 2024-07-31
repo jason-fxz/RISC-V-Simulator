@@ -1,4 +1,5 @@
 #include "../include/utils/utils.h"
+#include "circuits/bus.h"
 #include "config/types.h"
 
 
@@ -96,6 +97,26 @@ std::string OpcodeToStr(OpType opt) {
     case AND: return "AND";
     default: return "NONE";
     }
+}
+
+std::string BusTypeToStr(BusType type) {
+    switch (type) {
+    case BusType::WriteBack: return "WriteBack";  // Write back to ROB (Load / ALU)
+    case BusType::GetAddr: return "GetAddr";    // Get address for LSB
+    case BusType::CommitReg: return "CommitReg";     // ROB Commit to register file
+    case BusType::CommitMem: return "CommitMem";   // Store to memory
+    case BusType::StoreSuccess: return "StoreSuccess";  // Store success
+    default: return "NONE";
+    };
+}
+std::string RobStateToStr(RobState state) {
+    switch (state) {
+    case RobState::Issue: return "Issue";
+    case RobState::Exec: return "Exec";
+    case RobState::Write: return "Write";
+    case RobState::WaitSt: return "WaitSt";
+    default: return "NONE";
+    };
 }
 
 } // namespace jasonfxz

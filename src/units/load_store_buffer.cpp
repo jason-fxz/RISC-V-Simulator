@@ -12,46 +12,51 @@ namespace jasonfxz {
 
 
 void LoadStoreBuffer::Flush(State *cur_state) {
+    if (cur_state->clear) {
+        load_queue.clear();
+        // the storing should have be done
+        store_queue.clear();
+        cur_state->lsb_load_full = load_queue.full();
+        cur_state->lsb_store_full = store_queue.full();
+    }
     if (cur_state->lsb_load_inter.first) {
-        if (cur_state->lsb_load_inter.second.opc == OpClass::LOAD) {
-            // Load
-            if (!load_queue.push({cur_state->clock, cur_state->lsb_load_inter.second})) {
-                throw std::runtime_error("Load queue full");
-            }
-        } else {
-            // Store
-            if (!store_queue.push({cur_state->clock, cur_state->lsb_load_inter.second})) {
-                throw std::runtime_error("Store queue full");
-            }
+        if (!load_queue.push({cur_state->clock, cur_state->lsb_load_inter.second})) {
+            throw std::runtime_error("Load queue full");
+        }
+    }
+    if (cur_state->lsb_store_inter.first) {
+        if (!store_queue.push({cur_state->clock, cur_state->lsb_store_inter.second})) {
+            throw std::runtime_error("Store queue full");
         }
     }
     // Set the full flag
     cur_state->lsb_load_full = load_queue.full();
     cur_state->lsb_store_full = store_queue.full();
     // CD BUS
-    for (const auto &info : cd_bus->e) {
-        if (info.type == BusType::WriteBack) {
-            // Check Write back CDB
-            for (auto &it : load_queue) {
-                if (it.second.rob_dst == info.pos) {
-                    it.second.addr_ready = 1;
-                    it.second.addr = info.data;
+    for (const auto &it : cd_bus->e) if (it.first) {
+            const auto &info = it.second;
+            if (info.type == BusType::GetAddr) {
+                // Check CDB for Load and Store address
+                for (auto &it : load_queue) {
+                    if (it.second.rob_pos == info.pos) {
+                        it.second.addr_ready = 1;
+                        it.second.addr = info.data;
+                    }
                 }
-            }
-            for (auto &it : store_queue) {
-                if (it.second.rob_dst == info.pos) {
-                    it.second.addr_ready = 1;
-                    it.second.addr = info.data;
+                for (auto &it : store_queue) {
+                    if (it.second.rob_pos == info.pos) {
+                        it.second.addr_ready = 1;
+                        it.second.addr = info.data;
+                    }
                 }
+            } else if (info.type == BusType::CommitMem) {
+                // Store commit (Give the data)
+                assert(info.pos == store_queue.front().second.rob_pos);
+                assert(store_queue.front().second.addr_ready);
+                store_enable = true;
+                store_data = info.data; // Get Data (the data to store)
             }
-        } else if (info.type == BusType::Commit) {
-            // Store commit
-            assert(info.pos == store_queue.front().second.rob_dst);
-            assert(store_queue.front().second.addr_ready);
-            store_enable = true;
-            store_data = info.data;
         }
-    }
     if (store_queue.empty()) {
         load_enable_level = INT_MAX;
     } else {
@@ -76,7 +81,7 @@ void LoadStoreBuffer::Execute(State *cur_state, State *next_state) {
             auto &front = load_queue.front();
             BusInter bus_inter;
             bus_inter.type = BusType::WriteBack;
-            bus_inter.pos = front.second.rob_dst;
+            bus_inter.pos = front.second.rob_pos;
             switch (front.second.opt) {
             case LB: bus_inter.data = mem->ReadByte(front.second.addr); break;
             case LH: bus_inter.data = mem->ReadHalf(front.second.addr); break;
@@ -110,7 +115,7 @@ void LoadStoreBuffer::Execute(State *cur_state, State *next_state) {
             case SW: mem->WriteWord(store_queue.front().second.addr, store_data); break;
             default: throw std::runtime_error("Invalid store type");
             }
-            BusInter bus_inter{BusType::StoreSuccess, 0, store_queue.front().second.rob_dst};
+            BusInter bus_inter{BusType::StoreSuccess, 0, store_queue.front().second.rob_pos};
             if (!cd_bus->e.insert(bus_inter)) {
                 throw std::runtime_error("Cd bus full");
             }

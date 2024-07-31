@@ -47,8 +47,9 @@ const int MAX_RS_SIZE = 8; // Reservation Station : 8 entries
 
 const int MAX_LSB_SIZE = 8; // Load Store Buffer : 8 entries
 
+const int MAX_INS_SIZE = 32; // Instruction Queue : 32 entries
 
-// const int MAX_ROB_SIZE = 32; // ROB QUEUE : 32 entries
+const int MAX_ROB_SIZE = 32; // ROB QUEUE : 32 entries
 
 
 

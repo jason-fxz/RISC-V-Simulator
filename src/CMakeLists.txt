@@ -7,7 +7,6 @@ set(UNIT_SOURCE_CPPS
   units/memory_unit.cpp
   units/reorder_buffer.cpp
   units/reservation_station.cpp
-  units/register_file.cpp
 )
 
 set(UTILS_SOURCE_CPPS

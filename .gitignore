@@ -46,3 +46,5 @@ tmpdir/
 
 # Vscode
 .vscode/
+
+*.log
