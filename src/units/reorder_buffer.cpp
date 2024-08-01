@@ -90,7 +90,10 @@ void ReorderBuffer::Commit(State *cur_state, State *next_state) {
         return ;
     } else if (front.ins.opt == JALR) {
         // handle JALR
-        next_state->regfile[front.ins.rd] = {front.ins.ins_addr + 4, -1};
+        next_state->regfile[front.ins.rd].data = front.ins.ins_addr + 4;
+        if (next_state->regfile[front.ins.rd].recorder == front.rob_pos) {
+            next_state->regfile[front.ins.rd].recorder = -1;
+        }
         next_state->pc = front.data;
         assert(next_state->pc % 4 == 0);
         next_state->wait = false;

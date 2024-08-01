@@ -22,7 +22,7 @@ failed_list=()
 echo -e "\033[1m====================================================================="
 echo "                            Compileing                               "
 echo -e "=====================================================================\033[0m"
-rm -rf ./tmpdir
+# rm -rf ./tmpdir
 mkdir tmpdir
 cmake -S . -B tmpdir
 make -C tmpdir

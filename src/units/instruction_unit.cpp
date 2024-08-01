@@ -216,6 +216,9 @@ void Decoder::DecodeJ(InsType &ins) {
 }
 
 void InstructionUnit::FetchDecode(State *cur_state, State *next_state) {
+    if (next_state->clear) {
+        return ;
+    }
     if (cur_state->wait) {
         return;
     }

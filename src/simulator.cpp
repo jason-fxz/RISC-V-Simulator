@@ -10,11 +10,13 @@
 #include "units/load_store_buffer.h"
 #include "units/arithmetic_logic_unit.h"
 #include "utils/utils.h"
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <ostream>
 #include <ratio>
+#include <random>
 
 
 namespace jasonfxz {
@@ -24,11 +26,13 @@ Simulator::Simulator() {
     cd_bus = new CdBus();
     predictor = new Predictor();
     mem = new Memory();
-    units[0] = new InstructionUnit(predictor, mem);
-    units[1] = new ReorderBuffer(cd_bus, predictor);
+    units[0] = new LoadStoreBuffer(cd_bus, mem);
+    units[1] = new ReservationStation(cd_bus);
     units[2] = new ArithmeticLogicUnit(cd_bus);
-    units[3] = new ReservationStation(cd_bus);
-    units[4] = new LoadStoreBuffer(cd_bus, mem);
+    units[3] = new InstructionUnit(predictor, mem);
+    units[4] = new ReorderBuffer(cd_bus, predictor);
+
+
     cur_state = nullptr;
     next_state = nullptr;
 }
@@ -62,6 +66,9 @@ void Simulator::Flush() {
             rg.recorder = -1;
         }
     }
+    // for (int i = 4; i >= 0; --i) {
+    //     units[i]->Flush(cur_state);
+    // }
     for (auto &unit : units) {
         unit->Flush(cur_state);
     }
@@ -78,6 +85,9 @@ void Simulator::Execute() {
     for (auto &unit : units) {
         unit->Execute(cur_state, next_state);
     }
+    // for (int i = 4; i >= 0; --i) {
+    //     units[i]->Execute(cur_state, next_state);
+    // }
 }
 
 
@@ -89,12 +99,16 @@ void State::clear_state() {
 }
 
 ReturnType Simulator::Run() {
+    auto rd = std::default_random_engine(std::random_device()());
+    
 #ifdef DEBUG
     if (enable_debug) {
         PrintRegHelp(std::cout);
     }
 #endif
     while (true) {
+        std::shuffle(units, units + 5, rd);
+        
 #ifdef DEBUG
         if (enable_debug) {
             std::cerr << std::dec <<  "******************* clock " << next_state->clock << " wait: "  << next_state->wait <<

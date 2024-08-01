@@ -25,10 +25,10 @@ int duipai() {
     while (true) {
         ++step_count;
         jasonfxz::DebugRecord ans, out;
-        // if (step_count == 4952) {
-        //     sim.enable_debug = true;
-        //     nsim.enable_debug = true;
-        // }
+        if (step_count == 94) {
+            sim.enable_debug = true;
+            nsim.enable_debug = true;
+        }
         bool nflag = nsim.Step(ans);
         bool flag = sim.Step(out);
         assert(nflag == flag);
